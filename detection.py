@@ -98,29 +98,39 @@ def process_frame(frame):
 
 def process_video(input_video_path):
     """
-    Processes a video file, applying the shape detection to each frame and displaying the output.
+    Processes a video file, applying shape detection to each frame, displaying the output,
+    and saving the processed video to a file.
     
     Parameters:
     - input_video_path: Path to the input video file.
-    - area_threshold: Minimum area threshold to filter out small contours.
+    - output_video_path: Path to save the processed video file.
     """
+    output_video_path = input_video_path.replace('.mp4', '_processed.mp4')
+
     # Open the video capture
     cap = cv2.VideoCapture(input_video_path)
-
+    
+    # Get the video frame width, height, and frame rate from the original video
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    frame_rate = int(cap.get(cv2.CAP_PROP_FPS))
+    
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(output_video_path, fourcc, frame_rate, (frame_width, frame_height))
+    
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
         # Process the frame
         processed_frame = process_frame(frame)
-        # Display the processed frame
-        cv2.imshow('Processed Video', processed_frame)
-
-        # Press 'q' to quit video early
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
+        
+        # Write the processed frame to the output video
+        out.write(processed_frame)
+    
+    # Release video objects
     cap.release()
+    out.release()
     cv2.destroyAllWindows()
 
 def process_image(input_image_path):
